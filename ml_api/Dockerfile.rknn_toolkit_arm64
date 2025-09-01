@@ -1,0 +1,18 @@
+FROM docker.io/bitnami/minideb:bookworm as whlbuild
+ARG rknn_toolkit_whl=https://github.com/airockchip/rknn-toolkit2/raw/refs/heads/master/rknn-toolkit2/packages/arm64/rknn_toolkit2-2.3.2-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl
+RUN \
+    install_packages python3.11 python3.11-dev python3-pip build-essential cmake && \
+    mkdir /whl && \
+    pip wheel -w /whl "$rknn_toolkit_whl"
+
+FROM docker.io/bitnami/minideb:bookworm
+RUN \
+    --mount=type=bind,from=whlbuild,source=/whl,destination=/whl \
+    install_packages python3.11 python3.11-venv &&\
+    python3 -m venv --upgrade-deps /opt/rknn &&\
+    /opt/rknn/bin/pip3 install --find-links=/whl --no-index --only-binary ':all:' "rknn-toolkit2" &&\
+    /opt/rknn/bin/pip3 uninstall -y opencv-python &&\
+    /opt/rknn/bin/pip3 install opencv-python-headless &&\
+    /opt/rknn/bin/pip3 cache purge
+ENV PATH="/opt/rknn/bin:$PATH"
+ADD scripts/make_rknn_images.py /usr/local/bin

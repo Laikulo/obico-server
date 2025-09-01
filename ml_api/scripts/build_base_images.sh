@@ -2,6 +2,8 @@
 
 ## !!! NOTE: SET DOCKER ENGINE TO 8GB MEMORY !!! otherwise grpcio will fail to build !!!
 
+DOCKER=${DOCKER:-docker}
+
 VERSION=
 PREFIX=thespaghettidetective
 INSECURE=
@@ -26,16 +28,16 @@ fi
 # CPU + GPU image for amd64
 VERSION_BASE=${PREFIX}/ml_api_base:${VERSION}
 echo Building $VERSION_BASE
-docker build --platform linux/amd64 -f Dockerfile.base_amd64 -t ${VERSION_BASE}-linux-amd64 .
-docker push ${VERSION_BASE}-linux-amd64
+$DOCKER build --platform linux/amd64 -f Dockerfile.base_amd64 -t ${VERSION_BASE}-linux-amd64 .
+$DOCKER push ${VERSION_BASE}-linux-amd64
 # arm64(jetson)
-docker build --platform linux/arm64 -f Dockerfile.base_arm64 -t ${VERSION_BASE}-linux-arm64 .
-docker push ${VERSION_BASE}-linux-arm64
-docker manifest create ${INSECURE} ${VERSION_BASE} --amend ${VERSION_BASE}-linux-amd64 --amend ${VERSION_BASE}-linux-arm64
-docker manifest push ${INSECURE} ${VERSION_BASE}
+$DOCKER build --platform linux/arm64 -f Dockerfile.base_arm64 -t ${VERSION_BASE}-linux-arm64 .
+$DOCKER push ${VERSION_BASE}-linux-arm64
+$DOCKER manifest create ${INSECURE} ${VERSION_BASE} --amend ${VERSION_BASE}-linux-amd64 --amend ${VERSION_BASE}-linux-arm64
+$DOCKER manifest push ${INSECURE} ${VERSION_BASE}
 # arm64(rknn)
 RKNN_VERSION_BASE=${PREFIX}/ml_api_base_rknn:${VERSION}
-docker build --platform linux/arm64 -f Dockerfile.base_arm64_rknn -t "${RKNN_VERSION_BASE}"
-docker push "${RKNN_VERSION_BASE}"
+$DOCKER build --platform linux/arm64 -f Dockerfile.base_arm64_rknn -t "${RKNN_VERSION_BASE}"
+$DOCKER push "${RKNN_VERSION_BASE}"
 # At present, RKNN only supports arm64 targets, if they support something else (such as riscv) in the future,
 #   the same manifest pattern seen above will be needed here.
