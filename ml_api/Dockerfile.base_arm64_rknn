@@ -1,6 +1,11 @@
-FROM docker.io/bitnami/minideb:bookworm
+FROM docker.io/library/debian:bookworm-slim
+LABEL \
+    org.opencontainers.image.title="Obico ML base for RKNN" \
+    org.opencontainers.image.description="A suitible environment for running obico mlapi with an rknn model"
 RUN \
-    install_packages python3.11 python3.11-venv curl wget &&\
+    apt-get update && \
+    apt-get install -y python3.11 python3.11-venv curl wget && \
+    apt-get clean && \
     curl -L# 'https://github.com/airockchip/rknn-toolkit2/raw/refs/heads/master/rknpu2/runtime/Linux/librknn_api/aarch64/librknnrt.so' -o /usr/lib/librknnrt.so &&\
     python3.11 -m venv /opt/obico-python --upgrade-deps &&\
     /opt/obico-python/bin/python3.11 -m pip install https://github.com/airockchip/rknn-toolkit2/raw/refs/heads/master/rknn-toolkit-lite2/packages/rknn_toolkit_lite2-2.3.2-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl &&\
